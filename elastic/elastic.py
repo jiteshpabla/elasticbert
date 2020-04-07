@@ -4,6 +4,8 @@ from elasticsearch.exceptions import ConnectionError, NotFoundError
 
 # total number of responses
 SEARCH_SIZE = 1
+MODEL_NAME = "BERT"
+INDEX_NAME = "index1" # name of the index
 
 # establishing connections
 bc = BertClient(ip='localhost', output_fmt='list', check_length=False)
@@ -25,7 +27,7 @@ script_query = {
 
 try:
     response = client.search(
-         index='researchgate',  # name of the index
+         index= INDEX_NAME,
          body={
              "size": SEARCH_SIZE,
              "query": script_query,
@@ -33,6 +35,18 @@ try:
          }
      )
     print(response)
+
+    # to save the results in a csv
+    csv_file = MODEL_NAME+"_"+query+".csv"
+    csv_columns = ["_index", "_type", "_id", "_score", "_source"]
+    try:
+        with open(csv_file, 'w') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
+            writer.writeheader()
+            for data in response["hits"]["hits"]:
+                writer.writerow(data)
+    except IOError:
+        print("I/O error")
 except ConnectionError:
     print("[WARNING] docker isn't up and running!")
 except NotFoundError:
