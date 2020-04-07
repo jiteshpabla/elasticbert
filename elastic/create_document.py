@@ -38,7 +38,9 @@ def load_dataset(path):
 def bulk_predict(docs, batch_size=256):
     for i in range(0, len(docs), batch_size):
         batch_docs = docs[i: i+batch_size]
-        embeddings = bc.encode([doc['abstract'] for doc in batch_docs])
+        # to inlcude both title and abtract into BERT
+        embeddings = bc.encode([doc["title"]+" "+doc['abstract'] for ind, doc in enumerate(batch_docs)])
+        #embeddings = bc.encode([doc['abstract'] for doc in batch_docs])
         for emb in embeddings:
             yield emb
 
